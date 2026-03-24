@@ -1,0 +1,56 @@
+{
+  "name": "mdviewer",
+  "version": "1.0.0",
+  "description": "A lightweight Markdown viewer for Windows",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win"
+  },
+  "author": "MDViewer",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "markdown-it": "^14.0.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "highlight.js": "^11.9.0"
+  },
+  "build": {
+    "appId": "com.mdviewer.app",
+    "productName": "MDViewer",
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/icon.png",
+      "fileAssociations": [
+        {
+          "ext": "md",
+          "name": "Markdown File",
+          "description": "Markdown Document",
+          "role": "Viewer",
+          "icon": "assets/icon.png"
+        },
+        {
+          "ext": "markdown",
+          "name": "Markdown File",
+          "description": "Markdown Document",
+          "role": "Viewer",
+          "icon": "assets/icon.png"
+        }
+      ]
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "renderer.js",
+      "preload.js",
+      "styles.css",
+      "assets/**/*",
+      "node_modules/**/*"
+    ]
+  }
+}
