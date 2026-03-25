@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="theme-dark">
+<body class="theme-light">
   <!-- Toolbar -->
   <div class="toolbar">
     <div class="toolbar-left">
@@ -60,27 +60,62 @@
         </svg>
       </div>
       <h1>MDViewer</h1>
-      <p class="welcome-subtitle">Lightweight Markdown Viewer</p>
+      <p class="welcome-subtitle">Markdown & JSON Viewer</p>
       <div class="welcome-actions">
         <button class="welcome-btn" id="welcomeOpenBtn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
           </svg>
-          Open Markdown File
+          Open File
         </button>
       </div>
       <div class="welcome-hints">
         <div class="hint"><kbd>Ctrl+O</kbd> Open file</div>
         <div class="hint"><kbd>Ctrl+T</kbd> Toggle theme</div>
         <div class="hint"><kbd>Ctrl+/-</kbd> Zoom in/out</div>
-        <div class="hint">Drag & drop <code>.md</code> files</div>
+        <div class="hint">Drag & drop <code>.md</code> / <code>.json</code></div>
       </div>
     </div>
   </div>
 
-  <!-- Markdown Content -->
+  <!-- JSON Toolbar -->
+  <div class="json-toolbar" id="jsonToolbar" style="display: none;">
+    <div class="json-toolbar-left">
+      <span class="json-toolbar-label">JSON</span>
+    </div>
+    <div class="json-toolbar-right">
+      <button class="json-tool-btn" id="jsonExpandAllBtn" title="Expand All">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"/>
+          <polyline points="9 21 3 21 3 15"/>
+          <line x1="21" y1="3" x2="14" y2="10"/>
+          <line x1="3" y1="21" x2="10" y2="14"/>
+        </svg>
+      </button>
+      <button class="json-tool-btn" id="jsonCollapseAllBtn" title="Collapse All">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 14 10 14 10 20"/>
+          <polyline points="20 10 14 10 14 4"/>
+          <line x1="14" y1="10" x2="21" y2="3"/>
+          <line x1="3" y1="21" x2="10" y2="14"/>
+        </svg>
+      </button>
+      <div class="json-format-toggle">
+        <button class="json-format-btn active" id="jsonFormatBtn" title="Toggle Pretty/Raw (Ctrl+Shift+F)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+          <span id="jsonFormatLabel">Pretty</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Area -->
   <div class="content-wrapper" id="contentWrapper" style="display: none;">
     <article class="markdown-body" id="markdownContent"></article>
+    <div class="json-body" id="jsonContent" style="display: none;"></div>
   </div>
 
   <!-- Drop Overlay -->
@@ -91,7 +126,7 @@
         <polyline points="7,10 12,15 17,10"/>
         <line x1="12" y1="15" x2="12" y2="3"/>
       </svg>
-      <span>Drop Markdown file here</span>
+      <span>Drop file here</span>
     </div>
   </div>
 
