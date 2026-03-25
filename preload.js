@@ -47,5 +47,8 @@ contextBridge.exposeInMainWorld('mdviewer', {
   },
   onToggleTheme: (callback) => {
     ipcRenderer.on('toggle-theme', () => callback());
+  },
+  onToggleJsonFormat: (callback) => {
+    ipcRenderer.on('toggle-json-format', () => callback());
   }
 });

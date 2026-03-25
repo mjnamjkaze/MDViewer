@@ -2,6 +2,9 @@ const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron')
 const path = require('path');
 const fs = require('fs');
 
+// Supported file extensions
+const SUPPORTED_EXTENSIONS = ['.md', '.markdown', '.json'];
+
 // Single instance lock
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -16,20 +19,29 @@ function getFileFromArgs(args) {
   // Skip electron executable and app path
   for (let i = 1; i < args.length; i++) {
     const arg = args[i];
-    if (arg && !arg.startsWith('-') && !arg.startsWith('--') && 
-        (arg.endsWith('.md') || arg.endsWith('.markdown') || arg.endsWith('.MD') || arg.endsWith('.MARKDOWN'))) {
-      return path.resolve(arg);
+    if (arg && !arg.startsWith('-') && !arg.startsWith('--')) {
+      const ext = path.extname(arg).toLowerCase();
+      if (SUPPORTED_EXTENSIONS.includes(ext)) {
+        return path.resolve(arg);
+      }
     }
   }
   // Also check if last arg is a file path
   const lastArg = args[args.length - 1];
   if (lastArg && fs.existsSync(lastArg)) {
     const ext = path.extname(lastArg).toLowerCase();
-    if (ext === '.md' || ext === '.markdown') {
+    if (SUPPORTED_EXTENSIONS.includes(ext)) {
       return path.resolve(lastArg);
     }
   }
   return null;
+}
+
+// Determine file type from extension
+function getFileType(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext === '.json') return 'json';
+  return 'markdown';
 }
 
 // Check process.argv for file path
@@ -41,7 +53,7 @@ function createWindow() {
     height: 750,
     minWidth: 500,
     minHeight: 400,
-    backgroundColor: '#0d1117',
+    backgroundColor: '#ffffff',
     icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -75,8 +87,10 @@ function openFile(filePath) {
     const content = fs.readFileSync(filePath, 'utf-8');
     const fileName = path.basename(filePath);
     const dirPath = path.dirname(filePath);
-    mainWindow.setTitle(`${fileName} — MDViewer`);
-    mainWindow.webContents.send('file-opened', { content, fileName, filePath, dirPath });
+    const fileType = getFileType(filePath);
+    const appName = fileType === 'json' ? 'MDViewer — JSON' : 'MDViewer';
+    mainWindow.setTitle(`${fileName} — ${appName}`);
+    mainWindow.webContents.send('file-opened', { content, fileName, filePath, dirPath, fileType });
   } catch (err) {
     console.error('Error reading file:', err);
   }
@@ -84,9 +98,11 @@ function openFile(filePath) {
 
 async function openFileDialog() {
   const result = await dialog.showOpenDialog(mainWindow, {
-    title: 'Open Markdown File',
+    title: 'Open File',
     filters: [
+      { name: 'Supported Files', extensions: ['md', 'markdown', 'json'] },
       { name: 'Markdown Files', extensions: ['md', 'markdown'] },
+      { name: 'JSON Files', extensions: ['json'] },
       { name: 'All Files', extensions: ['*'] }
     ],
     properties: ['openFile']
@@ -123,6 +139,14 @@ function createMenu() {
           accelerator: 'CmdOrCtrl+T',
           click: () => {
             mainWindow.webContents.send('toggle-theme');
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Toggle JSON Format',
+          accelerator: 'CmdOrCtrl+Shift+F',
+          click: () => {
+            mainWindow.webContents.send('toggle-json-format');
           }
         },
         { type: 'separator' },
@@ -166,8 +190,8 @@ function createMenu() {
             dialog.showMessageBox(mainWindow, {
               type: 'info',
               title: 'About MDViewer',
-              message: 'MDViewer v1.0.0',
-              detail: 'A lightweight Markdown viewer for Windows.\n\nSupports CommonMark spec, syntax highlighting, tables, task lists, and more.',
+              message: 'MDViewer v1.1.0',
+              detail: 'A lightweight Markdown & JSON viewer for Windows.\n\nSupports CommonMark spec, syntax highlighting, tables, task lists, and beautiful JSON formatting.',
               buttons: ['OK']
             });
           }
@@ -198,7 +222,7 @@ ipcMain.handle('get-file-to-open', () => {
   return fileToOpen;
 });
 
-// Handle second instance (when user double-clicks another .md file while app is open)
+// Handle second instance (when user double-clicks another file while app is open)
 app.on('second-instance', (event, commandLine) => {
   const file = getFileFromArgs(commandLine);
   if (file && mainWindow) {
