@@ -22,6 +22,17 @@ const md = markdownIt({
   }
 }).use(taskLists, { enabled: true, label: true, labelAfter: true });
 
+const defaultRender = md.renderer.rules.fence || function(tokens, idx, options, env, self) {
+  return self.renderToken(tokens, idx, options);
+};
+md.renderer.rules.fence = function (tokens, idx, options, env, self) {
+  const token = tokens[idx];
+  if (token.info.trim() === 'mermaid') {
+    return `<div class="mermaid">${md.utils.escapeHtml(token.content)}</div>`;
+  }
+  return defaultRender(tokens, idx, options, env, self);
+};
+
 contextBridge.exposeInMainWorld('mdviewer', {
   openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
   readFile: (filePath) => ipcRenderer.invoke('read-file', filePath),

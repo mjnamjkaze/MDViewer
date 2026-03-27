@@ -130,6 +130,12 @@
     </div>
   </div>
 
+  <script type="module">
+    import mermaid from './node_modules/mermaid/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: document.body.classList.contains('theme-dark') ? 'dark' : 'default' });
+    window.mermaid = mermaid;
+    window.dispatchEvent(new Event('mermaid-loaded'));
+  </script>
   <script src="renderer.js"></script>
 </body>
 </html>

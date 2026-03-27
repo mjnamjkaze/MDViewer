@@ -17,9 +17,28 @@ const dropOverlay = document.getElementById('dropOverlay');
 // Current state
 let currentDirPath = '';
 let currentFileType = 'markdown';
+let currentMarkdownRaw = '';
 let currentJsonData = null;
 let currentJsonRaw = '';
 let jsonViewMode = 'pretty'; // 'pretty' or 'raw'
+
+function renderMermaidGraphs() {
+  if (window.mermaid) {
+    const nodes = document.querySelectorAll('.mermaid');
+    if (nodes.length > 0) {
+      window.mermaid.run({
+        querySelector: '.mermaid',
+        suppressErrors: true
+      }).catch(e => console.error('Mermaid render error:', e));
+    }
+  }
+}
+
+window.addEventListener('mermaid-loaded', () => {
+  if (currentFileType === 'markdown' && currentMarkdownRaw !== '') {
+    renderMermaidGraphs();
+  }
+});
 
 // Determine file type from name
 function getFileTypeFromName(name) {
@@ -32,8 +51,12 @@ function getFileTypeFromName(name) {
 function displayMarkdown(content, dirPath) {
   currentDirPath = dirPath || '';
   currentFileType = 'markdown';
+  currentMarkdownRaw = content;
   const html = window.mdviewer.renderMarkdown(content, currentDirPath);
   markdownContent.innerHTML = html;
+
+  // Render mermaid
+  setTimeout(renderMermaidGraphs, 0);
 
   // Make external links open in browser
   const links = markdownContent.querySelectorAll('a[href]');
@@ -323,6 +346,13 @@ function getTheme() {
 function setTheme(theme) {
   document.body.className = 'theme-' + theme;
   localStorage.setItem('mdviewer-theme', theme);
+
+  if (window.mermaid) {
+    window.mermaid.initialize({ startOnLoad: false, theme: theme === 'dark' ? 'dark' : 'default' });
+    if (currentFileType === 'markdown' && currentMarkdownRaw !== '') {
+      displayMarkdown(currentMarkdownRaw, currentDirPath);
+    }
+  }
 }
 
 function toggleTheme() {

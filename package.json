@@ -14,9 +14,10 @@
     "electron-builder": "^24.9.1"
   },
   "dependencies": {
+    "highlight.js": "^11.9.0",
     "markdown-it": "^14.0.0",
     "markdown-it-task-lists": "^2.1.1",
-    "highlight.js": "^11.9.0"
+    "mermaid": "^11.13.0"
   },
   "build": {
     "appId": "com.mdviewer.app",
